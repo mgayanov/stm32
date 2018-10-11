@@ -75,7 +75,7 @@ Drivers/STM32F7xx_HAL_Driver/Src/%.o: ../Drivers/STM32F7xx_HAL_Driver/Src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo $(PWD)
-	arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 '-D__weak=__attribute__((weak))' '-D__packed="__attribute__((__packed__))"' -DUSE_HAL_DRIVER -DSTM32F767xx -I"/home/ioz/Downloads/stm32/nucleo-spi1/Inc" -I"/home/ioz/Downloads/stm32/nucleo-spi1/Drivers/STM32F7xx_HAL_Driver/Inc" -I"/home/ioz/Downloads/stm32/nucleo-spi1/Drivers/STM32F7xx_HAL_Driver/Inc/Legacy" -I"/home/ioz/Downloads/stm32/nucleo-spi1/Drivers/CMSIS/Device/ST/STM32F7xx/Include" -I"/home/ioz/Downloads/stm32/nucleo-spi1/Drivers/CMSIS/Include"  -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 '-D__weak=__attribute__((weak))' '-D__packed="__attribute__((__packed__))"' -DUSE_HAL_DRIVER -DSTM32F767xx -I"/home/ioz/Documents/stm32/stm32f767zi+w5500/Inc" -I"/home/ioz/Documents/stm32/stm32f767zi+w5500/Drivers/STM32F7xx_HAL_Driver/Inc" -I"/home/ioz/Documents/stm32/stm32f767zi+w5500/Drivers/STM32F7xx_HAL_Driver/Inc/Legacy" -I"/home/ioz/Documents/stm32/stm32f767zi+w5500/Drivers/CMSIS/Device/ST/STM32F7xx/Include" -I"/home/ioz/Documents/stm32/stm32f767zi+w5500/Drivers/CMSIS/Include"  -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

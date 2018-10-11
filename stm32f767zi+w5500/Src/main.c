@@ -124,7 +124,7 @@ int main(void)
   w5500_init(&source);
 
   w5500_openSocket(SOCKET_0, TCP_MODE);
-  w5500_setSourcePort(LOCAL_PORT_80);
+  w5500_setSourcePort(SOCKET_0, LOCAL_PORT_80);
   w5500_listenSocket(SOCKET_0);
   /* USER CODE END 2 */
 
@@ -142,7 +142,7 @@ int main(void)
 
   while (1)
   {
-	  status = w5500_SocketStatus(BSB_S0, SOCKET_0);
+	  status = w5500_getSocketStatus(SOCKET_0);
 	  /*
 	  if(status == SOCK_UDP){
 		  write_pointer = w5500_getWritePointer();
@@ -166,28 +166,28 @@ int main(void)
   	  */
 
 	  if(status == SOCK_ESTABLISHED){
-		  rsr0 = w5500_readReg(BSB_S0, Sn_RX_RSR0);
-		  rsr1 = w5500_readReg(BSB_S0, Sn_RX_RSR1);
+		  rsr0 = w5500_readReg(BSB_Sn(SOCKET_0), Sn_RX_RSR0);
+		  rsr1 = w5500_readReg(BSB_Sn(SOCKET_0), Sn_RX_RSR1);
 		  len = rsr0<<8|rsr1;
 		  HAL_Delay(100);
 
-		  point = w5500_getReadPointer();
+		  point = w5500_getReadPointer(SOCKET_0);
 		  HAL_Delay(100);
 
 		  uint8_t buffer[2048];
 		  uint8_t i=0;
 		  while(i<10){
 			  i++;
-			  buffer[i] = w5500_readReg(BSB_S0_RX, point + i);
+			  buffer[i] = w5500_readReg(BSB_Sn_RX(SOCKET_0), point + i);
 		  }
 
 		  HAL_Delay(100);
 
 
-		  txbufsize = w5500_getTXBufSize();
+		  txbufsize = w5500_getTXBufSize(SOCKET_0);
 
-		  write_pointer = w5500_getWritePointer();
-		  w5500_writeReg(BSB_S0, BSB_S0_TX + write_pointer, "X");
+		  write_pointer = w5500_getWritePointer(SOCKET_0);
+		  w5500_writeReg(BSB_Sn(SOCKET_0), BSB_Sn_TX(SOCKET_0) + write_pointer, 0x80);
 		  //buf[0] = w5500_readReg(BSB_S0_TX, 0);
 		  /*
 		  for(uint8_t i = 0; i < sizeof(dhcpmsg); i++){
@@ -195,11 +195,11 @@ int main(void)
 			  write_pointer += i;
 		  }
 		   */
-		  w5500_setWritePointer(write_pointer+1);
-		  freesize = w5500_getTXFreeSize();
+		  w5500_setWritePointer(SOCKET_0, write_pointer+1);
+		  freesize = w5500_getTXFreeSize(SOCKET_0);
 
 		  for(uint8_t i = 0; i < 10; i++){
-			  buf[i] = w5500_readReg(BSB_S0_TX, i);
+			  buf[i] = w5500_readReg(BSB_Sn_TX(SOCKET_0), i);
 		  }
 
 

@@ -10,7 +10,7 @@ extern SPI_HandleTypeDef hspi1;
 
 void w5500_init(W5500_InitTypeDef *source){
 
-	CheckChipVersion();
+	w5500_checkChipVersion();
 
 	w5500_softReset();
 	w5500_setMACAddr(source->mac_address);
@@ -54,109 +54,109 @@ void w5500_setSourceIP(uint8_t *ip){
 	w5500_writeReg(BSB_COMMON, SIPR3, ip[3]);
 }
 
-void w5500_setSourcePort(uint8_t port){
-	w5500_writeReg(BSB_S0, Sn_PORT0, port>>8);
-	w5500_writeReg(BSB_S0, Sn_PORT1, port);
+void w5500_setSourcePort(uint8_t Socket, uint8_t port){
+	w5500_writeReg(BSB_Sn(Socket), Sn_PORT0, port>>8);
+	w5500_writeReg(BSB_Sn(Socket), Sn_PORT1, port);
 }
 
-void w5500_setDestinationIP(uint8_t ip[4]){
-	w5500_writeReg(BSB_S0, Sn_DIPR0, ip[0]);
-	w5500_writeReg(BSB_S0, Sn_DIPR1, ip[1]);
-	w5500_writeReg(BSB_S0, Sn_DIPR2, ip[2]);
-	w5500_writeReg(BSB_S0, Sn_DIPR3, ip[3]);
+void w5500_setDestinationIP(uint8_t Socket, uint8_t ip[4]){
+	w5500_writeReg(BSB_Sn(Socket), Sn_DIPR0, ip[0]);
+	w5500_writeReg(BSB_Sn(Socket), Sn_DIPR1, ip[1]);
+	w5500_writeReg(BSB_Sn(Socket), Sn_DIPR2, ip[2]);
+	w5500_writeReg(BSB_Sn(Socket), Sn_DIPR3, ip[3]);
 }
 
-void w5500_setDestinationPort(uint8_t port){
-	w5500_writeReg(BSB_S0, Sn_DPORT0, port>>8);
-	w5500_writeReg(BSB_S0, Sn_DPORT1, port);
+void w5500_setDestinationPort(uint8_t Socket, uint8_t port){
+	w5500_writeReg(BSB_Sn(Socket), Sn_DPORT0, port>>8);
+	w5500_writeReg(BSB_Sn(Socket), Sn_DPORT1, port);
 }
 
-uint16_t w5500_getReadPointer(){
+uint16_t w5500_getReadPointer(uint8_t Socket){
 	uint16_t read_pointer;
 	uint8_t rd0, rd1;
-	rd0 = w5500_readReg(BSB_S0, Sn_RX_RD0);
-	rd1 = w5500_readReg(BSB_S0, Sn_RX_RD1);
+	rd0 = w5500_readReg(BSB_Sn(Socket), Sn_RX_RD0);
+	rd1 = w5500_readReg(BSB_Sn(Socket), Sn_RX_RD1);
 	read_pointer = rd0<<8|rd1;
 	return read_pointer;
 }
 
-uint16_t w5500_getWritePointer(){
+uint16_t w5500_getWritePointer(uint8_t Socket){
 	uint16_t write_pointer;
 	uint8_t wr0, wr1;
-	wr0 = w5500_readReg(BSB_S0, Sn_TX_WR0);
-	wr1 = w5500_readReg(BSB_S0, Sn_TX_WR1);
+	wr0 = w5500_readReg(BSB_Sn(Socket), Sn_TX_WR0);
+	wr1 = w5500_readReg(BSB_Sn(Socket), Sn_TX_WR1);
 	write_pointer = wr0<<8|wr1;
 	return write_pointer;
 }
 
-uint16_t w5500_getTXFreeSize(){
+uint16_t w5500_getTXFreeSize(uint8_t Socket){
 	uint16_t size;
 	uint8_t fsr0, fsr1;
-	fsr0 = w5500_readReg(BSB_S0, Sn_TX_FSR0);
-	fsr1 = w5500_readReg(BSB_S0, Sn_TX_FSR1);
+	fsr0 = w5500_readReg(BSB_Sn(Socket), Sn_TX_FSR0);
+	fsr1 = w5500_readReg(BSB_Sn(Socket), Sn_TX_FSR1);
 	size = fsr0<<8|fsr1;
 
 	return size;
 }
 
-uint8_t w5500_getTXBufSize(){
-	return w5500_readReg(BSB_S0, Sn_TXBUF_SIZE);
+uint8_t w5500_getTXBufSize(uint8_t Socket){
+	return w5500_readReg(BSB_Sn(Socket), Sn_TXBUF_SIZE);
 }
 
-uint16_t w5500_getRXReceivedSize(){
+uint16_t w5500_getRXReceivedSize(uint8_t Socket){
 	uint16_t size;
 	uint8_t rsr0, rsr1;
-	rsr0 = w5500_readReg(BSB_S0, Sn_RX_RSR0);
-	rsr1 = w5500_readReg(BSB_S0, Sn_RX_RSR1);
+	rsr0 = w5500_readReg(BSB_Sn(Socket), Sn_RX_RSR0);
+	rsr1 = w5500_readReg(BSB_Sn(Socket), Sn_RX_RSR1);
 	size = rsr0<<8|rsr1;
 
 	return size;
 }
 
-void w5500_setWritePointer(uint8_t write_pointer){
-	w5500_writeReg(BSB_S0, Sn_TX_WR1, write_pointer);
+void w5500_setWritePointer(uint8_t Socket, uint8_t write_pointer){
+	w5500_writeReg(BSB_Sn(Socket), Sn_TX_WR1, write_pointer);
 }
 
-void CheckChipVersion(){
+void w5500_checkChipVersion(){
 	uint8_t v = w5500_readReg(BSB_COMMON, VERSIONR);
 	if(v != CHIPVERSION_0X04){
 		ErrorHandler();
 	}
 }
 
-uint8_t w5500_SocketStatus(uint8_t op, uint8_t sock_num){
-	return w5500_readReg(op, Sn_SR);
+uint8_t w5500_getSocketStatus(uint8_t Socket){
+	return w5500_readReg(BSB_Sn(Socket), Sn_SR);
 }
 
-void w5500_openSocket(uint8_t sock_num, uint16_t mode){
-	w5500_writeReg(BSB_S0, Sn_MR, mode);
-	w5500_writeReg(BSB_S0, Sn_CR, OPEN);
+void w5500_openSocket(uint8_t Socket, uint16_t mode){
+	w5500_writeReg(BSB_Sn(Socket), Sn_MR, mode);
+	w5500_writeReg(BSB_Sn(Socket), Sn_CR, OPEN);
 	HAL_Delay(1000);
 	uint8_t status;
 
 	while(1){
-		status = w5500_SocketStatus(BSB_S0, SOCKET_0);
+		status = w5500_getSocketStatus(SOCKET_0);
 		if(status == SOCK_INIT){
 			break;
 		}
 	}
 }
 
-void w5500_listenSocket(uint8_t sock_num){
-	w5500_writeReg(BSB_S0, Sn_CR, LISTEN); //LISTEN SOCKET
+void w5500_listenSocket(uint8_t Socket){
+	w5500_writeReg(BSB_Sn(Socket), Sn_CR, LISTEN); //LISTEN SOCKET
 	HAL_Delay(1000);
 	uint8_t status;
 
 	while(1){
-		status = w5500_SocketStatus(BSB_S0, SOCKET_0);
+		status = w5500_getSocketStatus(SOCKET_0);
 		if(status == SOCK_LISTEN){
 			break;
 		}
 	}
 }
 
-void w5500_send(){
-	w5500_writeReg(BSB_S0, Sn_CR, SEND);
+void w5500_send(uint8_t Socket){
+	w5500_writeReg(BSB_Sn(Socket), Sn_CR, SEND);
 	HAL_Delay(1000);
 }
 
@@ -178,7 +178,6 @@ uint8_t w5500_readReg(uint8_t block, uint16_t address){
 	HAL_StatusTypeDef read_stat;
 
 	read_stat = HAL_SPI_TransmitReceive(&hspi1, wbuf, rbuf, 4, 10);
-	//HAL_Delay(1000);
 	data = rbuf[3];
 	return data;
 }
