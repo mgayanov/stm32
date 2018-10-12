@@ -136,7 +136,7 @@ int main(void)
   uint8_t rsr0, rsr1, rd0, rd1;
   uint16_t len, point;
   uint8_t dhcpmsg[] = "DHCPDISCOVER";
-  uint16_t write_pointer;
+  uint16_t write_pointer, read_pointer;
   uint8_t buf[30];
   uint16_t freesize, txbufsize;
 
@@ -144,34 +144,25 @@ int main(void)
   {
 	  status = w5500_getSocketStatus(SOCKET_0);
 	  /*
-	  if(status == SOCK_UDP){
-		  write_pointer = w5500_getWritePointer();
-
-		  for(uint8_t i = 0; i < sizeof(dhcpmsg); i++){
-			  w5500_writeReg(BSB_S0, BSB_S0_TX + write_pointer, dhcpmsg[i]);
-			  write_pointer += i;
-		  }
-
-		  w5500_setWritePointer(write_pointer);
-		  /*
-		  for(uint8_t i = 0; i < sizeof(dhcpmsg); i++){
-			  buf[i] = w5500_readReg(BSB_S0_TX, i);
-		  }
-
-
-
-		  HAL_Delay(100);
-		  //w5500_send();
+	  write_pointer = w5500_getTXWritePointer(SOCKET_0);
+	  w5500_writeReg(BSB_Sn(SOCKET_0), BSB_Sn_TX(SOCKET_0) + write_pointer, 0x80);
+	  w5500_setWritePointer(SOCKET_0, write_pointer+1);
+	  for(uint8_t i = 0; i < 10; i++){
+		  buf[i] = w5500_readReg(BSB_Sn_TX(SOCKET_0), i);
 	  }
-  	  */
+
+	  write_pointer = w5500_getTXWritePointer(SOCKET_0);
+	  read_pointer = w5500_getTXReadPointer(SOCKET_0);
+	*/
 
 	  if(status == SOCK_ESTABLISHED){
+		  w5500_disconnSocket(SOCKET_0);
 		  rsr0 = w5500_readReg(BSB_Sn(SOCKET_0), Sn_RX_RSR0);
 		  rsr1 = w5500_readReg(BSB_Sn(SOCKET_0), Sn_RX_RSR1);
 		  len = rsr0<<8|rsr1;
 		  HAL_Delay(100);
 
-		  point = w5500_getReadPointer(SOCKET_0);
+		  point = w5500_getRXReadPointer(SOCKET_0);
 		  HAL_Delay(100);
 
 		  uint8_t buffer[2048];
@@ -186,7 +177,7 @@ int main(void)
 
 		  txbufsize = w5500_getTXBufSize(SOCKET_0);
 
-		  write_pointer = w5500_getWritePointer(SOCKET_0);
+		  write_pointer = w5500_getTXWritePointer(SOCKET_0);
 		  w5500_writeReg(BSB_Sn(SOCKET_0), BSB_Sn_TX(SOCKET_0) + write_pointer, 0x80);
 		  //buf[0] = w5500_readReg(BSB_S0_TX, 0);
 		  /*
@@ -198,13 +189,11 @@ int main(void)
 		  w5500_setWritePointer(SOCKET_0, write_pointer+1);
 		  freesize = w5500_getTXFreeSize(SOCKET_0);
 
-		  for(uint8_t i = 0; i < 10; i++){
-			  buf[i] = w5500_readReg(BSB_Sn_TX(SOCKET_0), i);
-		  }
 
-
-		  //w5500_send();
+		  w5500_send(SOCKET_0);
 		  HAL_Delay(100);
+
+		  w5500_closeSocket(SOCKET_0);
 	  }
 
 

@@ -71,7 +71,7 @@ void w5500_setDestinationPort(uint8_t Socket, uint8_t port){
 	w5500_writeReg(BSB_Sn(Socket), Sn_DPORT1, port);
 }
 
-uint16_t w5500_getReadPointer(uint8_t Socket){
+uint16_t w5500_getRXReadPointer(uint8_t Socket){
 	uint16_t read_pointer;
 	uint8_t rd0, rd1;
 	rd0 = w5500_readReg(BSB_Sn(Socket), Sn_RX_RD0);
@@ -80,13 +80,22 @@ uint16_t w5500_getReadPointer(uint8_t Socket){
 	return read_pointer;
 }
 
-uint16_t w5500_getWritePointer(uint8_t Socket){
+uint16_t w5500_getTXWritePointer(uint8_t Socket){
 	uint16_t write_pointer;
 	uint8_t wr0, wr1;
 	wr0 = w5500_readReg(BSB_Sn(Socket), Sn_TX_WR0);
 	wr1 = w5500_readReg(BSB_Sn(Socket), Sn_TX_WR1);
 	write_pointer = wr0<<8|wr1;
 	return write_pointer;
+}
+
+uint16_t w5500_getTXReadPointer(uint8_t Socket){
+	uint16_t read_pointer;
+	uint8_t rd0, rd1;
+	rd0 = w5500_readReg(BSB_Sn(Socket), Sn_TX_RD0);
+	rd1 = w5500_readReg(BSB_Sn(Socket), Sn_TX_RD1);
+	read_pointer = rd0<<8|rd1;
+	return read_pointer;
 }
 
 uint16_t w5500_getTXFreeSize(uint8_t Socket){
@@ -142,6 +151,16 @@ void w5500_openSocket(uint8_t Socket, uint16_t mode){
 	}
 }
 
+void w5500_closeSocket(uint8_t Socket){
+	w5500_writeReg(BSB_Sn(Socket), Sn_CR, CLOSE);
+	HAL_Delay(1000);
+}
+
+void w5500_disconnSocket(uint8_t Socket){
+	w5500_writeReg(BSB_Sn(Socket), Sn_CR, DISCON);
+	HAL_Delay(1000);
+}
+
 void w5500_listenSocket(uint8_t Socket){
 	w5500_writeReg(BSB_Sn(Socket), Sn_CR, LISTEN); //LISTEN SOCKET
 	HAL_Delay(1000);
@@ -159,6 +178,7 @@ void w5500_send(uint8_t Socket){
 	w5500_writeReg(BSB_Sn(Socket), Sn_CR, SEND);
 	HAL_Delay(1000);
 }
+
 
 void w5500_writeReg(uint8_t block, uint16_t address, uint8_t data){
 	uint8_t opcode = (block<<3)|OM_FDM1;
