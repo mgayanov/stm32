@@ -99,6 +99,8 @@
 #define Sn_RX_RSR1    0x0027
 #define Sn_RX_RD0     0x0028
 #define Sn_RX_RD1     0x0029
+#define Sn_RX_WR0     0x002A
+#define Sn_RX_WR1     0x002B
 #define Sn_TX_FSR0    0x0020
 #define Sn_TX_FSR1    0x0021
 #define Sn_TXBUF_SIZE 0x001F
@@ -149,6 +151,9 @@ void w5500_setDestinationIP(uint8_t Socket, uint8_t ip[4]);
 void w5500_setDestinationPort(uint8_t Socket, uint8_t port);
 
 uint16_t w5500_getRXReadPointer(uint8_t Socket);
+uint16_t w5500_getRXWritePointer(uint8_t Socket);
+uint16_t w5500_getRXReceivedSize(uint8_t Socket);
+uint8_t w5500_getRXBufByte(uint8_t Socket, uint16_t rxreadpointer);
 
 uint16_t w5500_getTXWritePointer(uint8_t Socket);
 uint16_t w5500_getTXReadPointer(uint8_t Socket);
@@ -156,11 +161,12 @@ uint16_t w5500_getTXReadPointer(uint8_t Socket);
 uint16_t w5500_getTXFreeSize(uint8_t Socket);
 uint8_t w5500_getTXBufSize(uint8_t Socket);
 
-uint16_t w5500_getRXReceivedSize(uint8_t Socket);
+
 
 void w5500_setWritePointer(uint8_t Socket, uint8_t write_pointer);
 
 void w5500_send(uint8_t Socket);
+void w5500_recv(uint8_t Socket);
 void w5500_closeSocket(uint8_t Socket);
 void w5500_disconnSocket(uint8_t Socket);
 

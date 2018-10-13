@@ -80,6 +80,15 @@ uint16_t w5500_getRXReadPointer(uint8_t Socket){
 	return read_pointer;
 }
 
+uint16_t w5500_getRXWritePointer(uint8_t Socket){
+	uint16_t write_pointer;
+	uint8_t wr0, wr1;
+	wr0 = w5500_readReg(BSB_Sn(Socket), Sn_RX_WR0);
+	wr1 = w5500_readReg(BSB_Sn(Socket), Sn_RX_WR1);
+	write_pointer = wr0<<8|wr1;
+	return write_pointer;
+}
+
 uint16_t w5500_getTXWritePointer(uint8_t Socket){
 	uint16_t write_pointer;
 	uint8_t wr0, wr1;
@@ -120,6 +129,10 @@ uint16_t w5500_getRXReceivedSize(uint8_t Socket){
 	size = rsr0<<8|rsr1;
 
 	return size;
+}
+
+uint8_t w5500_getRXBufByte(uint8_t Socket, uint16_t rxreadpointer){
+	return w5500_readReg(BSB_Sn_RX(SOCKET_0), rxreadpointer);
 }
 
 void w5500_setWritePointer(uint8_t Socket, uint8_t write_pointer){
@@ -176,6 +189,11 @@ void w5500_listenSocket(uint8_t Socket){
 
 void w5500_send(uint8_t Socket){
 	w5500_writeReg(BSB_Sn(Socket), Sn_CR, SEND);
+	HAL_Delay(1000);
+}
+
+void w5500_recv(uint8_t Socket){
+	w5500_writeReg(BSB_Sn(Socket), Sn_CR, RECV);
 	HAL_Delay(1000);
 }
 

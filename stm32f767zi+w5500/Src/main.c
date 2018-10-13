@@ -131,45 +131,28 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t status;
-  uint8_t flag = 0;
-  uint8_t rsr0, rsr1, rd0, rd1;
-  uint16_t len, point;
-  uint8_t dhcpmsg[] = "DHCPDISCOVER";
+  uint8_t status, rsr0, rsr1;
+  uint16_t len, rxreadpointer, rxwritepointer;
   uint16_t write_pointer, read_pointer;
-  uint8_t buf[30];
-  uint16_t freesize, txbufsize;
+  uint8_t rxbuffer[50];
+  uint8_t i=0;
+  uint16_t freesize, txbufsize, rxreceivedsize;
 
   while (1)
   {
 	  status = w5500_getSocketStatus(SOCKET_0);
-	  /*
-	  write_pointer = w5500_getTXWritePointer(SOCKET_0);
-	  w5500_writeReg(BSB_Sn(SOCKET_0), BSB_Sn_TX(SOCKET_0) + write_pointer, 0x80);
-	  w5500_setWritePointer(SOCKET_0, write_pointer+1);
-	  for(uint8_t i = 0; i < 10; i++){
-		  buf[i] = w5500_readReg(BSB_Sn_TX(SOCKET_0), i);
-	  }
-
-	  write_pointer = w5500_getTXWritePointer(SOCKET_0);
-	  read_pointer = w5500_getTXReadPointer(SOCKET_0);
-	*/
 
 	  if(status == SOCK_ESTABLISHED){
-		  w5500_disconnSocket(SOCKET_0);
-		  rsr0 = w5500_readReg(BSB_Sn(SOCKET_0), Sn_RX_RSR0);
-		  rsr1 = w5500_readReg(BSB_Sn(SOCKET_0), Sn_RX_RSR1);
-		  len = rsr0<<8|rsr1;
+
+		  w5500_recv(SOCKET_0);
+		  rxreceivedsize = w5500_getRXReceivedSize(SOCKET_0);
+		  rxreadpointer  = w5500_getRXReadPointer(SOCKET_0);
+		  rxwritepointer = w5500_getRXWritePointer(SOCKET_0);
 		  HAL_Delay(100);
 
-		  point = w5500_getRXReadPointer(SOCKET_0);
-		  HAL_Delay(100);
-
-		  uint8_t buffer[2048];
-		  uint8_t i=0;
-		  while(i<10){
+		  while(i < 10){
+			  rxbuffer[i] = w5500_getRXBufByte(SOCKET_0, rxreadpointer + i);
 			  i++;
-			  buffer[i] = w5500_readReg(BSB_Sn_RX(SOCKET_0), point + i);
 		  }
 
 		  HAL_Delay(100);
@@ -179,20 +162,14 @@ int main(void)
 
 		  write_pointer = w5500_getTXWritePointer(SOCKET_0);
 		  w5500_writeReg(BSB_Sn(SOCKET_0), BSB_Sn_TX(SOCKET_0) + write_pointer, 0x80);
-		  //buf[0] = w5500_readReg(BSB_S0_TX, 0);
-		  /*
-		  for(uint8_t i = 0; i < sizeof(dhcpmsg); i++){
-			  w5500_writeReg(BSB_S0, BSB_S0_TX + write_pointer, dhcpmsg[i]);
-			  write_pointer += i;
-		  }
-		   */
+
 		  w5500_setWritePointer(SOCKET_0, write_pointer+1);
 		  freesize = w5500_getTXFreeSize(SOCKET_0);
 
 
 		  w5500_send(SOCKET_0);
 		  HAL_Delay(100);
-
+		  w5500_disconnSocket(SOCKET_0);
 		  w5500_closeSocket(SOCKET_0);
 	  }
 
