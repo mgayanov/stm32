@@ -114,7 +114,7 @@ int main(void)
   uint8_t mac_address[6] = {0x00,0x15,0x42,0xBF,0xF0,0x51};
   uint8_t gw[4]          = {192,168,1,2};
   uint8_t subnet_mask[4] = {255,255,255,0};
-  uint8_t ip[4]          = {192,168,1,196};
+  uint8_t ip[4]          = {192,168,1,198};
 
   source.mac_address = mac_address;
   source.ip = ip;
@@ -123,54 +123,60 @@ int main(void)
 
   w5500_init(&source);
 
-  w5500_openSocket(SOCKET_0, TCP_MODE);
-  w5500_setSourcePort(SOCKET_0, LOCAL_PORT_80);
-  w5500_listenSocket(SOCKET_0);
+  uint8_t socket = SOCKET_0;
+
+  w5500_openSocket(socket, TCP_MODE);
+  w5500_setSourcePort(socket, LOCAL_PORT_80);
+  w5500_listenSocket(socket);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t status, rsr0, rsr1;
-  uint16_t len, rxreadpointer, rxwritepointer;
-  uint16_t write_pointer, read_pointer;
-  uint8_t rxbuffer[50];
-  uint8_t i=0;
-  uint16_t freesize, txbufsize, rxreceivedsize;
+  uint8_t status;
+
+  uint16_t rxreceivedsize, rxreadpointer, rxwritepointer;
+  uint8_t rxbuffer[50], txbuffer[100];
+
+  uint16_t txbufsize, txfreesize, txreadpointer, txwritepointer;
+
+  uint8_t i = 0;
+
+  const char http_header[] = { "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"};
+  const char header_302[] = { "HTTP/1.1 302 Found\r\nLocation: ya.ru\r\n"};
+
 
   while (1)
   {
-	  status = w5500_getSocketStatus(SOCKET_0);
+	  status = w5500_getSocketStatus(socket);
 
 	  if(status == SOCK_ESTABLISHED){
 
-		  w5500_recv(SOCKET_0);
-		  rxreceivedsize = w5500_getRXReceivedSize(SOCKET_0);
-		  rxreadpointer  = w5500_getRXReadPointer(SOCKET_0);
-		  rxwritepointer = w5500_getRXWritePointer(SOCKET_0);
-		  HAL_Delay(100);
+		  w5500_recv(socket);
 
-		  while(i < 10){
-			  rxbuffer[i] = w5500_getRXBufByte(SOCKET_0, rxreadpointer + i);
-			  i++;
+		  txreadpointer = w5500_getTXReadPointer(socket);
+		  txwritepointer = w5500_getTXWritePointer(socket);
+
+		  for(uint8_t k = 0; k < sizeof(http_header); k++){
+			  w5500_writeReg(BSB_Sn_TX(socket), txwritepointer + k, http_header[k]);
 		  }
 
+		  uint8_t msg[] = {"hello world"};
+
+		  for(uint8_t k = 0; k < sizeof(msg); k++){
+			  w5500_writeReg(BSB_Sn_TX(socket), txwritepointer + sizeof(http_header) + k, msg[k]);
+		  }
+
+		  w5500_setTXWritePointer(socket, txwritepointer + sizeof(http_header) + sizeof(msg));
+
+		  w5500_send(socket);
+		  w5500_disconnSocket(socket);
+		  w5500_closeSocket(socket);
+
 		  HAL_Delay(100);
 
-
-		  txbufsize = w5500_getTXBufSize(SOCKET_0);
-
-		  write_pointer = w5500_getTXWritePointer(SOCKET_0);
-		  w5500_writeReg(BSB_Sn(SOCKET_0), BSB_Sn_TX(SOCKET_0) + write_pointer, 0x80);
-
-		  w5500_setWritePointer(SOCKET_0, write_pointer+1);
-		  freesize = w5500_getTXFreeSize(SOCKET_0);
-
-
-		  w5500_send(SOCKET_0);
-		  HAL_Delay(100);
-		  w5500_disconnSocket(SOCKET_0);
-		  w5500_closeSocket(SOCKET_0);
+		  w5500_openSocket(socket, TCP_MODE);
+		  w5500_listenSocket(socket);
 	  }
 
 
@@ -267,7 +273,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

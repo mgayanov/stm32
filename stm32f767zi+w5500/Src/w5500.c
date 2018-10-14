@@ -131,12 +131,18 @@ uint16_t w5500_getRXReceivedSize(uint8_t Socket){
 	return size;
 }
 
-uint8_t w5500_getRXBufByte(uint8_t Socket, uint16_t rxreadpointer){
-	return w5500_readReg(BSB_Sn_RX(SOCKET_0), rxreadpointer);
+void w5500_setTXWritePointer(uint8_t Socket, uint16_t txwritepointer){
+	w5500_writeReg(BSB_Sn(Socket), Sn_TX_WR0, txwritepointer >> 8);
+	w5500_writeReg(BSB_Sn(Socket), Sn_TX_WR1, txwritepointer & 0xFF);
 }
 
-void w5500_setWritePointer(uint8_t Socket, uint8_t write_pointer){
-	w5500_writeReg(BSB_Sn(Socket), Sn_TX_WR1, write_pointer);
+void w5500_setTXReadPointer(uint8_t Socket, uint16_t txreadpointer){
+	w5500_writeReg(BSB_Sn(Socket), Sn_TX_RD0, txreadpointer >> 8);
+	w5500_writeReg(BSB_Sn(Socket), Sn_TX_RD1, txreadpointer & 0xFF);
+}
+
+uint8_t w5500_getRXBufByte(uint8_t Socket, uint16_t rxreadpointer){
+	return w5500_readReg(BSB_Sn_RX(Socket), rxreadpointer);
 }
 
 void w5500_checkChipVersion(){
@@ -180,7 +186,7 @@ void w5500_listenSocket(uint8_t Socket){
 	uint8_t status;
 
 	while(1){
-		status = w5500_getSocketStatus(SOCKET_0);
+		status = w5500_getSocketStatus(Socket);
 		if(status == SOCK_LISTEN){
 			break;
 		}

@@ -106,7 +106,6 @@
 #define Sn_TXBUF_SIZE 0x001F
 #define Sn_TX_WR0     0x0024
 #define Sn_TX_WR1     0x0025
-
 #define Sn_TX_RD0     0x0022
 #define Sn_TX_RD1     0x0023
 
@@ -157,13 +156,11 @@ uint8_t w5500_getRXBufByte(uint8_t Socket, uint16_t rxreadpointer);
 
 uint16_t w5500_getTXWritePointer(uint8_t Socket);
 uint16_t w5500_getTXReadPointer(uint8_t Socket);
-
 uint16_t w5500_getTXFreeSize(uint8_t Socket);
 uint8_t w5500_getTXBufSize(uint8_t Socket);
 
-
-
-void w5500_setWritePointer(uint8_t Socket, uint8_t write_pointer);
+void w5500_setTXWritePointer(uint8_t Socket, uint16_t txwritepointer);
+void w5500_setTXReadPointer(uint8_t Socket, uint16_t txwritepointer);
 
 void w5500_send(uint8_t Socket);
 void w5500_recv(uint8_t Socket);
