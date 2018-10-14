@@ -123,7 +123,7 @@ int main(void)
 
   w5500_init(&source);
 
-  uint8_t socket = SOCKET_0;
+  uint8_t socket = SOCKET_7;
 
   w5500_openSocket(socket, TCP_MODE);
   w5500_setSourcePort(socket, LOCAL_PORT_80);
@@ -161,7 +161,7 @@ int main(void)
 			  w5500_writeReg(BSB_Sn_TX(socket), txwritepointer + k, http_header[k]);
 		  }
 
-		  uint8_t msg[] = {"hello world"};
+		  uint8_t msg[] = {"hello world 7"};
 
 		  for(uint8_t k = 0; k < sizeof(msg); k++){
 			  w5500_writeReg(BSB_Sn_TX(socket), txwritepointer + sizeof(http_header) + k, msg[k]);

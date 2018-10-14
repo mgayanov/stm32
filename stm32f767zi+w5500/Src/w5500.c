@@ -163,7 +163,7 @@ void w5500_openSocket(uint8_t Socket, uint16_t mode){
 	uint8_t status;
 
 	while(1){
-		status = w5500_getSocketStatus(SOCKET_0);
+		status = w5500_getSocketStatus(Socket);
 		if(status == SOCK_INIT){
 			break;
 		}
